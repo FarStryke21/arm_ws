@@ -1,0 +1,14 @@
+cobot_IK
+/home/aman/arm_ws/devel/.private/cobot_IK/cmake.lock /home/aman/arm_ws/devel/./cmake.lock
+/home/aman/arm_ws/devel/.private/cobot_IK/share/cobot_IK/cmake/cobot_IKConfig-version.cmake /home/aman/arm_ws/devel/share/cobot_IK/cmake/cobot_IKConfig-version.cmake
+/home/aman/arm_ws/devel/.private/cobot_IK/share/cobot_IK/cmake/cobot_IKConfig.cmake /home/aman/arm_ws/devel/share/cobot_IK/cmake/cobot_IKConfig.cmake
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/cobot_IK/pick_place_simple_client_node /home/aman/arm_ws/devel/lib/cobot_IK/pick_place_simple_client_node
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/cobot_IK/ik_test_node /home/aman/arm_ws/devel/lib/cobot_IK/ik_test_node
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/cobot_IK/pick_place_simple_node /home/aman/arm_ws/devel/lib/cobot_IK/pick_place_simple_node
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/cobot_IK/pick_place_node /home/aman/arm_ws/devel/lib/cobot_IK/pick_place_node
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/cobot_IK/ur5_pick_place_node /home/aman/arm_ws/devel/lib/cobot_IK/ur5_pick_place_node
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/cobot_IK/ur5_ik_test_node /home/aman/arm_ws/devel/lib/cobot_IK/ur5_ik_test_node
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/cobot_IK/pick_place_simple_client_class_node /home/aman/arm_ws/devel/lib/cobot_IK/pick_place_simple_client_class_node
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/cobot_IK/ur5_pick_place_yt_node /home/aman/arm_ws/devel/lib/cobot_IK/ur5_pick_place_yt_node
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/cobot_IK/pick_place_test_node /home/aman/arm_ws/devel/lib/cobot_IK/pick_place_test_node
+/home/aman/arm_ws/devel/.private/cobot_IK/lib/pkgconfig/cobot_IK.pc /home/aman/arm_ws/devel/lib/pkgconfig/cobot_IK.pc
