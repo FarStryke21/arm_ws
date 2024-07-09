@@ -1,0 +1,5 @@
+ur5_sim
+/home/aman/arm_ws/devel/.private/ur5_sim/cmake.lock /home/aman/arm_ws/devel/./cmake.lock
+/home/aman/arm_ws/devel/.private/ur5_sim/share/ur5_sim/cmake/ur5_simConfig.cmake /home/aman/arm_ws/devel/share/ur5_sim/cmake/ur5_simConfig.cmake
+/home/aman/arm_ws/devel/.private/ur5_sim/share/ur5_sim/cmake/ur5_simConfig-version.cmake /home/aman/arm_ws/devel/share/ur5_sim/cmake/ur5_simConfig-version.cmake
+/home/aman/arm_ws/devel/.private/ur5_sim/lib/pkgconfig/ur5_sim.pc /home/aman/arm_ws/devel/lib/pkgconfig/ur5_sim.pc
