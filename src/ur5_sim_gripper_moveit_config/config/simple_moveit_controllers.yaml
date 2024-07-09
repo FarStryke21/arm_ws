@@ -1,7 +1,8 @@
 controller_list:
-  - name: "/ur5/eff_joint_traj_controller"
+  - name: /ur5/eff_joint_traj_controller
     action_ns: follow_joint_trajectory
     type: FollowJointTrajectory
+    default: True
     joints:
       - shoulder_pan_joint
       - shoulder_lift_joint
@@ -9,3 +10,9 @@ controller_list:
       - wrist_1_joint
       - wrist_2_joint
       - wrist_3_joint
+  - name: /ur5/gripper_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: True
+    joints:
+      - robotiq_85_left_knuckle_joint

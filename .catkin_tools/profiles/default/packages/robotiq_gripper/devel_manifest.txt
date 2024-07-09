@@ -1,0 +1,5 @@
+robotiq_gripper
+/home/aman/arm_ws/devel/.private/robotiq_gripper/cmake.lock /home/aman/arm_ws/devel/./cmake.lock
+/home/aman/arm_ws/devel/.private/robotiq_gripper/share/robotiq_gripper/cmake/robotiq_gripperConfig.cmake /home/aman/arm_ws/devel/share/robotiq_gripper/cmake/robotiq_gripperConfig.cmake
+/home/aman/arm_ws/devel/.private/robotiq_gripper/share/robotiq_gripper/cmake/robotiq_gripperConfig-version.cmake /home/aman/arm_ws/devel/share/robotiq_gripper/cmake/robotiq_gripperConfig-version.cmake
+/home/aman/arm_ws/devel/.private/robotiq_gripper/lib/pkgconfig/robotiq_gripper.pc /home/aman/arm_ws/devel/lib/pkgconfig/robotiq_gripper.pc

@@ -1,0 +1,5 @@
+ur_gripper_moveit_config
+/home/aman/arm_ws/devel/.private/ur_gripper_moveit_config/cmake.lock /home/aman/arm_ws/devel/./cmake.lock
+/home/aman/arm_ws/devel/.private/ur_gripper_moveit_config/share/ur_gripper_moveit_config/cmake/ur_gripper_moveit_configConfig-version.cmake /home/aman/arm_ws/devel/share/ur_gripper_moveit_config/cmake/ur_gripper_moveit_configConfig-version.cmake
+/home/aman/arm_ws/devel/.private/ur_gripper_moveit_config/share/ur_gripper_moveit_config/cmake/ur_gripper_moveit_configConfig.cmake /home/aman/arm_ws/devel/share/ur_gripper_moveit_config/cmake/ur_gripper_moveit_configConfig.cmake
+/home/aman/arm_ws/devel/.private/ur_gripper_moveit_config/lib/pkgconfig/ur_gripper_moveit_config.pc /home/aman/arm_ws/devel/lib/pkgconfig/ur_gripper_moveit_config.pc
