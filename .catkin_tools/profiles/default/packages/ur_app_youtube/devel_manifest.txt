@@ -1,5 +1,0 @@
-ur_app_youtube
-/home/aman/arm_ws/devel/.private/ur_app_youtube/cmake.lock /home/aman/arm_ws/devel/./cmake.lock
-/home/aman/arm_ws/devel/.private/ur_app_youtube/share/ur_app_youtube/cmake/ur_app_youtubeConfig-version.cmake /home/aman/arm_ws/devel/share/ur_app_youtube/cmake/ur_app_youtubeConfig-version.cmake
-/home/aman/arm_ws/devel/.private/ur_app_youtube/share/ur_app_youtube/cmake/ur_app_youtubeConfig.cmake /home/aman/arm_ws/devel/share/ur_app_youtube/cmake/ur_app_youtubeConfig.cmake
-/home/aman/arm_ws/devel/.private/ur_app_youtube/lib/pkgconfig/ur_app_youtube.pc /home/aman/arm_ws/devel/lib/pkgconfig/ur_app_youtube.pc
