@@ -8,9 +8,9 @@
 // tau = 1 rotation in radiants
 const double tau = 2 * M_PI;
 
+
 void openGripper(trajectory_msgs::JointTrajectory& posture)
 {
-  
     posture.joint_names.resize(1);
     posture.joint_names[0] = "robotiq_85_left_knuckle_joint";
 
@@ -24,7 +24,6 @@ void openGripper(trajectory_msgs::JointTrajectory& posture)
 
 void closedGripper(trajectory_msgs::JointTrajectory& posture)
 {
-
     posture.joint_names.resize(1);
     posture.joint_names[0] = "robotiq_85_left_knuckle_joint";
 
@@ -33,6 +32,7 @@ void closedGripper(trajectory_msgs::JointTrajectory& posture)
     posture.points[0].positions.resize(1);
     posture.points[0].positions[0] = 0.785;
     posture.points[0].time_from_start = ros::Duration(0.5);
+
 
 }
 
@@ -44,7 +44,6 @@ void ur5_pick(moveit::planning_interface::MoveGroupInterface& move_group)
     // Grasp pose
     grasps[0].grasp_pose.header.frame_id = "base_link";
     tf2::Quaternion orientation;
-
     orientation.setRPY(-tau, tau/4, tau/4);
     grasps[0].grasp_pose.pose.orientation = tf2::toMsg(orientation);
     grasps[0].grasp_pose.pose.position.x = 0.5;
@@ -76,7 +75,7 @@ void ur5_pick(moveit::planning_interface::MoveGroupInterface& move_group)
 
     // Call pick to pick up the object using the grasps given
     move_group.pick("object", grasps);
-  
+
 }
 
 void ur5_place(moveit::planning_interface::MoveGroupInterface& group)
@@ -90,7 +89,6 @@ void ur5_place(moveit::planning_interface::MoveGroupInterface& group)
 
     orientation.setRPY(0, 0, tau / 4);  // A quarter turn about the z-axis
     place_location[0].place_pose.pose.orientation = tf2::toMsg(orientation);
-    
     place_location[0].place_pose.pose.position.x = 0;
     place_location[0].place_pose.pose.position.y = 0.5;
     place_location[0].place_pose.pose.position.z = 0.3;
@@ -121,9 +119,6 @@ void ur5_place(moveit::planning_interface::MoveGroupInterface& group)
 
 
 }
-
-
-
 
 void addCollisionObject(moveit::planning_interface::PlanningSceneInterface& planning_scene_interface)
 {
