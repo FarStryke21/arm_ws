@@ -1,0 +1,153 @@
+#!/usr/bin/env python
+
+import rospy
+from sensor_msgs.msg import PointCloud2, PointField
+import sensor_msgs.point_cloud2 as pc2
+import numpy as np
+import open3d as o3d
+import moveit_commander
+import geometry_msgs.msg
+import tf2_ros
+import tf2_geometry_msgs
+from registration_helper import *
+from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
+from sensor_msgs import point_cloud2
+import std_msgs
+from open3d_ros_helper import convertCloudFromOpen3dToRos, convertCloudFromRosToOpen3d
+
+def mask_blue_points(pcd):
+    # Extract the RGB values
+    rgb = np.asarray(pcd.colors)
+    # Mask out the blue points
+    mask = (rgb[:,2] > 0.3) & (rgb[:,1] < 0.3) & (rgb[:,0] < 0.3) # Corrected condition to select blue points
+    pcd.colors = o3d.utility.Vector3dVector(rgb[mask])
+    pcd.points = o3d.utility.Vector3dVector(np.asarray(pcd.points)[mask])
+
+    # remove outliers
+    cl, ind = pcd.remove_statistical_outlier(nb_neighbors=20, std_ratio=2.0)
+    pcd = pcd.select_by_index(ind)
+
+    return pcd
+
+def get_cylinder_pose(pcd):
+    # Create a cylinder cloud of radius 0.05 and height 0.2
+    cylinder = o3d.geometry.TriangleMesh.create_cylinder(radius=0.05, height=0.2)
+
+    source = cylinder.sample_points_uniformly(number_of_points=10000)
+    target = pcd
+
+    voxel_size = 0.01
+
+    # 1. Downsample the point clouds and get the FPFH features
+    source_down, source_fpfh = preprocess_point_cloud(source, voxel_size)
+    target_down, target_fpfh = preprocess_point_cloud(target, voxel_size)
+
+    # Coarse registration
+    global_registration_result = execute_global_registration(source_down, target_down, source_fpfh, target_fpfh, voxel_size)
+
+    # Refine registration
+    refine_registration_result = refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, global_registration_result.transformation)
+
+    # Transform the source point cloud to the target point cloud's frame
+    source.transform(refine_registration_result.transformation)
+
+    # Find the centroid of the source point cloud
+    centroid = np.mean(np.asarray(source.points), axis=0)  
+
+    return centroid 
+
+def motion_planner(cylinder_pose):
+    # Initialize the moveit_commander
+    moveit_commander.roscpp_initialize(sys.argv)
+
+    # Initialize the robot commander
+    robot = moveit_commander.RobotCommander()
+
+    # Initialize the planning scene interface
+    scene = moveit_commander.PlanningSceneInterface()
+
+    # Initialize the move group commander
+    group_name = "manipulator"
+    move_group = moveit_commander.MoveGroupCommander(group_name)
+
+    # Set the reference frame
+    reference_frame = "base_link"
+    move_group.set_pose_reference_frame(reference_frame)
+    
+    # Add collision objects for the cylinder and gropund plane
+    cylinder_pose = geometry_msgs.msg.Pose()
+    cylinder_pose.position.x = cylinder_pose[0]
+    cylinder_pose.position.y = cylinder_pose[1]
+    cylinder_pose.position.z = cylinder_pose[2]
+    cylinder_pose.orientation.w = 1.0
+    scene.add_box("cylinder", cylinder_pose, size=(0.05, 0.05, 0.2))
+
+    ground_pose = geometry_msgs.msg.Pose()
+    ground_pose.position.x = 0.0
+    ground_pose.position.y = 0.0
+    ground_pose.position.z = -0.1
+    ground_pose.orientation.w = 1.0
+    scene.add_box("ground", ground_pose, size=(1.0, 1.0, 0.1))
+
+    # Plan the motion to the cylinder
+    move_group.set_start_state_to_current_state()
+    move_group.set_goal_position_tolerance(0.1)
+    move_group.set_goal_orientation_tolerance(0.1)
+    move_group.set_pose_target(cylinder_pose)
+    plan = move_group.plan()
+
+    # Execute the motion
+    move_group.execute(plan)
+
+    # Shutdown the moveit_commander
+    moveit_commander.roscpp_shutdown()
+
+
+def point_cloud_callback(msg):
+    # setup so that the callback is only triggered once
+    # global trigger
+    # if trigger:
+    #     return
+    # trigger = True
+
+    # Initialize tf2 buffer and listener
+    tf_buffer = tf2_ros.Buffer()
+    tf_listener = tf2_ros.TransformListener(tf_buffer)
+
+    # Wait for the transform to become available
+    try:
+        transform = tf_buffer.lookup_transform('base_link', msg.header.frame_id, msg.header.stamp, rospy.Duration(1.0))
+    except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+        rospy.logerr("Could not get transform: %s", e)
+        return
+
+    # Transform the point cloud
+    cloud_in_base_link = do_transform_cloud(msg, transform)
+
+    rospy.loginfo("Received point cloud with %d points", len(list(pc2.read_points(cloud_in_base_link, field_names=("x", "y", "z"), skip_nans=True))))
+
+    # Convert the point cloud to open3d format
+
+    cloud = convertCloudFromRosToOpen3d(cloud_in_base_link)
+    # o3d.visualization.draw_geometries([cloud])
+
+    # Mask out blue points
+    cloud = mask_blue_points(cloud)
+    pub.publish(convertCloudFromOpen3dToRos(cloud, frame_id="base_link"))
+    # o3d.visualization.draw_geometries([cloud])
+    
+    # Get the pose of the cylinder
+    cylinder_pose = get_cylinder_pose(cloud)
+
+    rospy.loginfo("Cylinder pose: {}".format(cylinder_pose))
+    # Call the moveit_commander to move the robot to the cylinder
+    # motion_planner(cylinder_pose)
+
+
+if __name__ == "__main__":
+    # setup a global variable to trigger the callback
+    trigger = False
+    rospy.init_node('cylinder_pickup')
+    rospy.Subscriber('/rgbd_camera/depth/points', PointCloud2, point_cloud_callback)
+    pub = rospy.Publisher('/mask', PointCloud2, queue_size=10)
+    rospy.spin()
