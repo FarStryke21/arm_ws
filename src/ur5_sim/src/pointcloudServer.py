@@ -14,6 +14,7 @@ from tf2_sensor_msgs.tf2_sensor_msgs import do_transform_cloud
 from sensor_msgs import point_cloud2
 import std_msgs
 from open3d_ros_helper import convertCloudFromOpen3dToRos, convertCloudFromRosToOpen3d
+import sys
 
 def mask_blue_points(pcd):
     # Extract the RGB values
@@ -29,14 +30,14 @@ def mask_blue_points(pcd):
 
     return pcd
 
-def get_cylinder_pose(pcd):
-    # Create a cylinder cloud of radius 0.05 and height 0.2
-    cylinder = o3d.geometry.TriangleMesh.create_cylinder(radius=0.05, height=0.2)
+def get_cylinder_pose(pcd, vis=False):
+    # Create a cylinder cloud of radius 0.03 and height 0.2
+    cylinder = o3d.geometry.TriangleMesh.create_cylinder(radius=0.03, height=0.2)
 
     source = cylinder.sample_points_uniformly(number_of_points=10000)
     target = pcd
 
-    voxel_size = 0.01
+    voxel_size = 0.005
 
     # 1. Downsample the point clouds and get the FPFH features
     source_down, source_fpfh = preprocess_point_cloud(source, voxel_size)
@@ -46,10 +47,13 @@ def get_cylinder_pose(pcd):
     global_registration_result = execute_global_registration(source_down, target_down, source_fpfh, target_fpfh, voxel_size)
 
     # Refine registration
-    refine_registration_result = refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, global_registration_result.transformation)
+    refine_registration_result = refine_registration(source, target, voxel_size, global_registration_result.transformation)
 
     # Transform the source point cloud to the target point cloud's frame
     source.transform(refine_registration_result.transformation)
+
+    if vis:
+        o3d.visualization.draw_geometries([source, target])
 
     # Find the centroid of the source point cloud
     centroid = np.mean(np.asarray(source.points), axis=0)  
@@ -73,42 +77,50 @@ def motion_planner(cylinder_pose):
     # Set the reference frame
     reference_frame = "base_link"
     move_group.set_pose_reference_frame(reference_frame)
-    
-    # Add collision objects for the cylinder and gropund plane
-    cylinder_pose = geometry_msgs.msg.Pose()
-    cylinder_pose.position.x = cylinder_pose[0]
-    cylinder_pose.position.y = cylinder_pose[1]
-    cylinder_pose.position.z = cylinder_pose[2]
-    cylinder_pose.orientation.w = 1.0
-    scene.add_box("cylinder", cylinder_pose, size=(0.05, 0.05, 0.2))
+    try:
+        # Remove all world objects
+        scene.remove_world_object()
 
-    ground_pose = geometry_msgs.msg.Pose()
-    ground_pose.position.x = 0.0
-    ground_pose.position.y = 0.0
-    ground_pose.position.z = -0.1
-    ground_pose.orientation.w = 1.0
-    scene.add_box("ground", ground_pose, size=(1.0, 1.0, 0.1))
+        # Add collision objects for the cylinder and ground plane
+        cylinder = geometry_msgs.msg.PoseStamped()
+        cylinder.header.frame_id = reference_frame  
+        cylinder.pose.position.x = cylinder_pose[0]
+        cylinder.pose.position.y = cylinder_pose[1]
+        cylinder.pose.position.z = cylinder_pose[2]
+        cylinder.pose.orientation.w = 1.0
+        scene.add_cylinder("cylinder", cylinder, height=0.2, radius=0.03)
 
+        ground_pose = geometry_msgs.msg.PoseStamped()
+        ground_pose.header.frame_id = reference_frame  
+        ground_pose.pose.position.x = 0.0
+        ground_pose.pose.position.y = 0.0
+        ground_pose.pose.position.z = -0.1
+        ground_pose.pose.orientation.w = 1.0
+        scene.add_plane("ground", ground_pose, normal=(0, 0, 1), offset=0.0)    
+
+    except Exception as e:
+        rospy.logerr("Failed to add collision objects: %s", e)
+        return
     # Plan the motion to the cylinder
-    move_group.set_start_state_to_current_state()
-    move_group.set_goal_position_tolerance(0.1)
-    move_group.set_goal_orientation_tolerance(0.1)
-    move_group.set_pose_target(cylinder_pose)
-    plan = move_group.plan()
+    # move_group.set_start_state_to_current_state()
+    # move_group.set_goal_position_tolerance(0.1)
+    # move_group.set_goal_orientation_tolerance(0.1)
+    # move_group.set_pose_target(cylinder_pose)
+    # plan = move_group.plan()
 
-    # Execute the motion
-    move_group.execute(plan)
+    # # Execute the motion
+    # move_group.execute(plan)
 
-    # Shutdown the moveit_commander
-    moveit_commander.roscpp_shutdown()
+    # # Shutdown the moveit_commander
+    # moveit_commander.roscpp_shutdown()
 
 
 def point_cloud_callback(msg):
     # setup so that the callback is only triggered once
-    # global trigger
-    # if trigger:
-    #     return
-    # trigger = True
+    global trigger
+    if trigger:
+        return
+    trigger = True
 
     # Initialize tf2 buffer and listener
     tf_buffer = tf2_ros.Buffer()
@@ -137,11 +149,11 @@ def point_cloud_callback(msg):
     # o3d.visualization.draw_geometries([cloud])
     
     # Get the pose of the cylinder
-    cylinder_pose = get_cylinder_pose(cloud)
+    cylinder_pose = get_cylinder_pose(cloud, vis=False)
 
     rospy.loginfo("Cylinder pose: {}".format(cylinder_pose))
     # Call the moveit_commander to move the robot to the cylinder
-    # motion_planner(cylinder_pose)
+    motion_planner(cylinder_pose)
 
 
 if __name__ == "__main__":

@@ -35,7 +35,7 @@ def execute_global_registration(source_down, target_down, source_fpfh,
         ], o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.999))
     return result
 
-def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, initial_transformation, log = False):  
+def refine_registration(source, target, voxel_size, initial_transformation, log = False):  
     distance_threshold = voxel_size * 0.4
     if log: 
         print(":: Point-to-plane ICP registration is applied on original point")

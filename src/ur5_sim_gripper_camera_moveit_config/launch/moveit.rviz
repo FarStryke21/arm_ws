@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /MotionPlanning1
       Splitter Ratio: 0.5
-    Tree Height: 394
+    Tree Height: 383
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -394,14 +394,14 @@ Visualization Manager:
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.009999999776482582
-      Style: Flat Squares
+      Style: Points
       Topic: /rgbd_camera/depth/points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
     - Class: rviz/Image
-      Enabled: true
+      Enabled: false
       Image Topic: /rgbd_camera/rgb/image_raw
       Max Value: 1
       Median window: 5
@@ -411,6 +411,111 @@ Visualization Manager:
       Queue Size: 2
       Transport Hint: raw
       Unreliable: false
+      Value: false
+    - Class: rviz/TF
+      Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base:
+          Value: false
+        base_link:
+          Value: true
+        base_link_inertia:
+          Value: false
+        flange:
+          Value: false
+        forearm_link:
+          Value: false
+        rgbd_camera_depth_frame:
+          Value: false
+        rgbd_camera_depth_optical_frame:
+          Value: false
+        rgbd_camera_link:
+          Value: false
+        rgbd_camera_optical_frame:
+          Value: false
+        rgbd_camera_rgb_frame:
+          Value: false
+        rgbd_camera_rgb_optical_frame:
+          Value: false
+        robotiq_85_base_link:
+          Value: false
+        robotiq_85_left_finger_link:
+          Value: false
+        robotiq_85_left_finger_tip_link:
+          Value: false
+        robotiq_85_left_inner_knuckle_link:
+          Value: false
+        robotiq_85_left_knuckle_link:
+          Value: false
+        robotiq_85_right_finger_link:
+          Value: false
+        robotiq_85_right_finger_tip_link:
+          Value: false
+        robotiq_85_right_inner_knuckle_link:
+          Value: false
+        robotiq_85_right_knuckle_link:
+          Value: false
+        shoulder_link:
+          Value: false
+        tool0:
+          Value: false
+        upper_arm_link:
+          Value: false
+        world:
+          Value: false
+        wrist_1_link:
+          Value: false
+        wrist_2_link:
+          Value: false
+        wrist_3_link:
+          Value: false
+      Marker Alpha: 1
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          base_link:
+            base:
+              {}
+            base_link_inertia:
+              shoulder_link:
+                upper_arm_link:
+                  forearm_link:
+                    wrist_1_link:
+                      wrist_2_link:
+                        wrist_3_link:
+                          flange:
+                            tool0:
+                              robotiq_85_base_link:
+                                robotiq_85_left_inner_knuckle_link:
+                                  robotiq_85_left_finger_tip_link:
+                                    {}
+                                robotiq_85_left_knuckle_link:
+                                  robotiq_85_left_finger_link:
+                                    {}
+                                robotiq_85_right_inner_knuckle_link:
+                                  robotiq_85_right_finger_tip_link:
+                                    {}
+                                robotiq_85_right_knuckle_link:
+                                  robotiq_85_right_finger_link:
+                                    {}
+            rgbd_camera_link:
+              rgbd_camera_depth_frame:
+                rgbd_camera_depth_optical_frame:
+                  {}
+              rgbd_camera_optical_frame:
+                {}
+              rgbd_camera_rgb_frame:
+                rgbd_camera_rgb_optical_frame:
+                  {}
+      Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
@@ -428,7 +533,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.025874614715576
+      Distance: 1.2302272319793701
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -436,17 +541,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.75
       Focal Point:
-        X: -0.10000000149011612
-        Y: 0.25
-        Z: 0.30000001192092896
+        X: 0.4542604982852936
+        Y: 0.08075175434350967
+        Z: 0.3104417324066162
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.41499990224838257
+      Pitch: 0.11000055074691772
       Target Frame: world
-      Yaw: 2.769941806793213
+      Yaw: 1.114956021308899
     Saved: ~
 Window Geometry:
   Displays:
@@ -462,7 +567,7 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000200000000000001f30000039efc0200000007fb000000100044006900730070006c006100790073010000003d0000021b000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a00560069006500770073000000010c000000a4000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e0067010000025e0000017d0000017d00ffffff000000020000053f000002cdfc0100000001fb0000000a0049006d00610067006501000001f90000053f0000007600ffffff0000053f000000cb00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000200000000000001f30000039efc0200000007fb000000100044006900730070006c006100790073010000003d00000210000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a00560069006500770073000000010c000000a4000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e00670100000253000001880000017d00ffffff000000020000053f000002cdfc0100000001fb0000000a0049006d00610067006500000001f90000053f0000007600ffffff0000053f0000039e00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 1848
