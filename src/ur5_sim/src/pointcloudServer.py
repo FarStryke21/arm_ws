@@ -6,6 +6,7 @@ import sensor_msgs.point_cloud2 as pc2
 import numpy as np
 import open3d as o3d
 import moveit_commander
+import moveit_msgs.msg
 import geometry_msgs.msg
 import tf2_ros
 import tf2_geometry_msgs
@@ -74,45 +75,87 @@ def motion_planner(cylinder_pose):
     group_name = "manipulator"
     move_group = moveit_commander.MoveGroupCommander(group_name)
 
+    # Set the group for the gripper
+    gripper = moveit_commander.MoveGroupCommander("gripper")
+
     # Set the reference frame
     reference_frame = "base_link"
     move_group.set_pose_reference_frame(reference_frame)
-    try:
-        # Remove all world objects
-        scene.remove_world_object()
 
-        # Add collision objects for the cylinder and ground plane
-        cylinder = geometry_msgs.msg.PoseStamped()
-        cylinder.header.frame_id = reference_frame  
-        cylinder.pose.position.x = cylinder_pose[0]
-        cylinder.pose.position.y = cylinder_pose[1]
-        cylinder.pose.position.z = cylinder_pose[2]
-        cylinder.pose.orientation.w = 1.0
-        scene.add_cylinder("cylinder", cylinder, height=0.2, radius=0.03)
+    # Remove all world objects
+    scene.remove_world_object()
 
-        ground_pose = geometry_msgs.msg.PoseStamped()
-        ground_pose.header.frame_id = reference_frame  
-        ground_pose.pose.position.x = 0.0
-        ground_pose.pose.position.y = 0.0
-        ground_pose.pose.position.z = -0.1
-        ground_pose.pose.orientation.w = 1.0
-        scene.add_plane("ground", ground_pose, normal=(0, 0, 1), offset=0.0)    
+    # Add collision objects for the cylinder and ground plane
+    cylinder = geometry_msgs.msg.PoseStamped()
+    cylinder.header.frame_id = reference_frame  
+    cylinder.pose.position.x = cylinder_pose[0]
+    cylinder.pose.position.y = cylinder_pose[1]
+    cylinder.pose.position.z = cylinder_pose[2]
+    cylinder.pose.orientation.w = 1.0
+    scene.add_cylinder("cylinder", cylinder, height=0.2, radius=0.03)
 
-    except Exception as e:
-        rospy.logerr("Failed to add collision objects: %s", e)
-        return
+    ground_pose = geometry_msgs.msg.PoseStamped()
+    ground_pose.header.frame_id = reference_frame  
+    ground_pose.pose.position.x = 0.0
+    ground_pose.pose.position.y = 0.0
+    ground_pose.pose.position.z = -0.1
+    ground_pose.pose.orientation.w = 1.0
+    scene.add_plane("ground", ground_pose, normal=(0, 0, 1), offset=0.0)    
+    
     # Plan the motion to the cylinder
-    # move_group.set_start_state_to_current_state()
-    # move_group.set_goal_position_tolerance(0.1)
-    # move_group.set_goal_orientation_tolerance(0.1)
-    # move_group.set_pose_target(cylinder_pose)
-    # plan = move_group.plan()
+    move_group.set_start_state_to_current_state()
+    move_group.set_goal_position_tolerance(0.1)
+    move_group.set_goal_orientation_tolerance(0.1)
+    
+    # Pick the cylinder
+    pose_target = geometry_msgs.msg.PoseStamped()
+    pose_target.header.frame_id = reference_frame
+    pose_target.pose.position.x = cylinder_pose[0]
+    pose_target.pose.position.y = cylinder_pose[1]
+    pose_target.pose.position.z = cylinder_pose[2] + 0.2
+    pose_target.pose.orientation.x = 0.0
+    pose_target.pose.orientation.y = 1.0
+    pose_target.pose.orientation.z = 0.0
+    pose_target.pose.orientation.w = 0.0
 
-    # # Execute the motion
-    # move_group.execute(plan)
+    # print pose target
+    print(pose_target)
 
-    # # Shutdown the moveit_commander
-    # moveit_commander.roscpp_shutdown()
+    move_group.set_pose_target(pose_target)
+    move_group.go(wait=True)
+    move_group.stop()
+    move_group.clear_pose_targets()
+
+    # Close the gripper
+    gripper.set_named_target("closed")
+    gripper.go(wait=True)
+    gripper.stop()
+    gripper.clear_pose_targets()
+
+    # Move the cylinder to a new location
+    pose_target.pose.position.x = 0.2
+    pose_target.pose.position.y = 0.2
+    pose_target.pose.position.z = 0.2
+    move_group.set_pose_target(pose_target)
+
+    move_group.go(wait=True)
+    move_group.stop()
+    move_group.clear_pose_targets()
+
+    # Open the gripper
+    gripper.set_named_target("open")
+    gripper.go(wait=True)
+    gripper.stop()
+    gripper.clear_pose_targets()
+
+    # Return the robot to the home position
+    move_group.set_named_target("up")
+    move_group.go(wait=True)
+    move_group.stop()
+    move_group.clear_pose_targets()
+
+    # Shutdown the moveit_commander
+    moveit_commander.roscpp_shutdown()
 
 
 def point_cloud_callback(msg):
@@ -162,4 +205,6 @@ if __name__ == "__main__":
     rospy.init_node('cylinder_pickup')
     rospy.Subscriber('/rgbd_camera/depth/points', PointCloud2, point_cloud_callback)
     pub = rospy.Publisher('/mask', PointCloud2, queue_size=10)
+    display_trajectory_publisher = rospy.Publisher("/move_group/display_planned_path", moveit_msgs.msg.DisplayTrajectory, queue_size=20)
+
     rospy.spin()
