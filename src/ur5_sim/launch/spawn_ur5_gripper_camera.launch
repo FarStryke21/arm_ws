@@ -66,6 +66,7 @@
         <arg name="rviz_config" value="$(find ur5_sim_gripper_camera_moveit_config)/launch/moveit.rviz" />
     </include>
 
+    <!-- Spawn the node attach and detach object-->
+    <!-- <node name="link_attacher_node" pkg="gazebo_ros_link_attacher" type="gazebo_ros_link_attacher" output="screen" /> -->
 
-    
 </launch>
