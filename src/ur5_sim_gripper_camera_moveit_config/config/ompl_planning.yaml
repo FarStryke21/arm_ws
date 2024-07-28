@@ -35,13 +35,9 @@ planner_configs:
     type: geometric::RRT
     range: 0.0  # Max motion added to tree. ==> maxDistance_ default: 0.0, if 0.0, set on setup()
     goal_bias: 0.05  # When close to goal select goal, with this probability? default: 0.05
-    planning_attempts: 5  # Increase the number of replanning attempts
-    max_planning_time: 5.0  # Maximum planning time per attempt
   RRTConnect:
     type: geometric::RRTConnect
     range: 0.0  # Max motion added to tree. ==> maxDistance_ default: 0.0, if 0.0, set on setup()
-    planning_attempts: 5  # Increase the number of replanning attempts
-    max_planning_time: 5.0  # Maximum planning time per attempt
   RRTstar:
     type: geometric::RRTstar
     range: 0.0  # Max motion added to tree. ==> maxDistance_ default: 0.0, if 0.0, set on setup()
@@ -169,7 +165,9 @@ planner_configs:
     use_strict_queue_ordering: 0  # sort edges in the queue at the end of the batch (0) or after each rewiring (1). Default: 0
     find_approximate_solutions: 0  # track approximate solutions (1) or not (0). Default: 0
 manipulator:
-  default_planner_config: RRT
+  planning_attempts: 50  # Increase the number of replanning attempts
+  max_planning_time: 20.0  # Maximum planning time per attempt
+  default_planner_config: RRTConnect
   planner_configs:
     - AnytimePathShortening
     - SBL
@@ -199,6 +197,7 @@ manipulator:
     - ABITstar
     - BITstar
 gripper:
+  default_planner_config: RRT
   planner_configs:
     - AnytimePathShortening
     - SBL

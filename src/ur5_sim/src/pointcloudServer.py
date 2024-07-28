@@ -62,16 +62,16 @@ def get_cylinder_pose(pcd, vis=False):
 
     return centroid 
 
-def attach_object():
+def attach_object(model1 = "ur5", link1 = "wrist_3_link", model2 = "blue_cylinder", link2 = "link_0"):
     rospy.wait_for_service('/link_attacher_node/attach')
     
     try:
         attach_srv = rospy.ServiceProxy('/link_attacher_node/attach', Attach)
         req = AttachRequest()
-        req.model_name_1 = "robot"
-        req.link_name_1 = "gripper"
-        req.model_name_2 = "object"
-        req.link_name_2 = "link"
+        req.model_name_1 = model1
+        req.link_name_1 = link1
+        req.model_name_2 = model2
+        req.link_name_2 = link2
         
         resp = attach_srv.call(req)
         if resp.ok:
@@ -81,16 +81,16 @@ def attach_object():
     except rospy.ServiceException as e:
         rospy.logerr("Service call failed: %s" % e)
 
-def detach_object():
+def detach_object(model1 = "ur5", link1 = "wrist_3_link", model2 = "blue_cylinder", link2 = "link_0"):
     rospy.wait_for_service('/link_attacher_node/detach')
     
     try:
         detach_srv = rospy.ServiceProxy('/link_attacher_node/detach', Attach)
         req = AttachRequest()
-        req.model_name_1 = "robot"
-        req.link_name_1 = "gripper"
-        req.model_name_2 = "object"
-        req.link_name_2 = "link"
+        req.model_name_1 = model1
+        req.link_name_1 = link1
+        req.model_name_2 = model2
+        req.link_name_2 = link2
         
         resp = detach_srv.call(req)
         if resp.ok:
@@ -116,6 +116,15 @@ def motion_planner(cylinder_pose):
 
     # Set the group for the gripper
     gripper = moveit_commander.MoveGroupCommander("gripper")
+    # joint_values = gripper.get_current_joint_values()
+    # joint_values[2] = 0.250
+    # gripper.set_start_state_to_current_state()
+    # gripper.set_joint_value_target(joint_values)
+    # gripper.go(wait=True)
+    # gripper.stop()
+    # gripper.clear_pose_targets()
+
+    # input("Proceed?")
 
     # Set the reference frame
     reference_frame = "base_link"
@@ -140,8 +149,8 @@ def motion_planner(cylinder_pose):
     
     # Plan the motion to the cylinder
     move_group.set_start_state_to_current_state()
-    # move_group.set_goal_position_tolerance(0.1)
-    # move_group.set_goal_orientation_tolerance(0.1)
+    move_group.set_goal_position_tolerance(0.001)
+    move_group.set_goal_orientation_tolerance(0.001)
     
     # Pick the cylinder
     pose_target = geometry_msgs.msg.PoseStamped()
@@ -163,44 +172,86 @@ def motion_planner(cylinder_pose):
     gripper.go(wait=True)
     gripper.stop()
     gripper.clear_pose_targets()
-    move_group.set_named_target("up")
+    move_group.set_named_target("home")
     move_group.go(wait=True)
     move_group.stop()
     move_group.clear_pose_targets()
+    rospy.loginfo("Done")
+
+    # wait for user input to continue
+    input("Press Enter to continue...")
 
     # Plan the motion for pre-grasp pose
     rospy.loginfo("Planning to pre-grasp pose")
+    move_group.set_start_state_to_current_state()
     move_group.set_pose_target(pose_target)
     move_group.go(wait=True)
     move_group.stop()
     move_group.clear_pose_targets()
+    rospy.loginfo("Done")
+
+    # wait for user input to continue
+    input("Press Enter to continue...")
 
     # Plan the motion for grasp pose
     rospy.loginfo("Planning to grasp pose")
-    pose_target.pose.position.z = cylinder_pose[2] + 0.2
+    pose_target.pose.position.z = cylinder_pose[2] + 0.22
+    move_group.set_start_state_to_current_state()
     move_group.set_pose_target(pose_target)
     move_group.go(wait=True)
     move_group.stop()
+    move_group.clear_pose_targets()
+    rospy.loginfo("Done")
+
+    # wait for user input to continue
+    input("Press Enter to continue...")
 
     # Close the gripper
     rospy.loginfo("Closing gripper")
-    gripper.set_named_target("closed")
+    joint_values = gripper.get_current_joint_values()
+    joint_values[2] = 0.2
+
+    gripper.set_start_state_to_current_state()
+    gripper.set_joint_value_target(joint_values)
+    # gripper.set_named_target("close")
     gripper.go(wait=True)
     gripper.stop()
     gripper.clear_pose_targets()
+    
+    rospy.loginfo("Done")
+
+    # wait for user input to continue
+    input("Press Enter to continue...")
+    attach_object()
+    touch_links = robot.get_link_names()
+    scene.attach_cylinder("wrist_3_link", "cylinder", touch_links=touch_links)
+    input("Press Enter to continue...")
 
     # Move the cylinder to a new location
     rospy.loginfo("Moving the cylinder to a new location")
     pose_target.pose.position.x = -0.4
     pose_target.pose.position.y = -0.4
     pose_target.pose.position.z = 0.5
+    move_group.set_start_state_to_current_state()
     move_group.set_pose_target(pose_target)
     move_group.go(wait=True)
     move_group.stop()
     move_group.clear_pose_targets()
+    rospy.loginfo("Done")
+
+    # wait for user input to continue
+    input("Press Enter to continue...")
 
     # Open the gripper
     rospy.loginfo("Dropping Object")
+    detach_object()
+    scene.remove_attached_object("wrist_3_link", name="cylinder")
+    scene.remove_world_object("cylinder")
+    rospy.loginfo("Done")
+
+    # wait for user input to continue
+    input("Press Enter to continue...")
+
     gripper.set_named_target("open")
     gripper.go(wait=True)
     gripper.stop()
@@ -208,10 +259,15 @@ def motion_planner(cylinder_pose):
 
     # Return the robot to the home position
     rospy.loginfo("Returning to home position")
-    move_group.set_named_target("up")
+    move_group.set_start_state_to_current_state()
+    move_group.set_named_target("home")
     move_group.go(wait=True)
     move_group.stop()
     move_group.clear_pose_targets()
+    rospy.loginfo("Done")
+
+    # wait for user input to continue
+    input("Press Enter to continue...")
 
     # Remove all world objects
     scene.remove_world_object()
