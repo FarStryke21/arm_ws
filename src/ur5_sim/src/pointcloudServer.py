@@ -227,11 +227,21 @@ def motion_planner(cylinder_pose):
     scene.attach_cylinder("wrist_3_link", "cylinder", touch_links=touch_links)
     input("Press Enter to continue...")
 
+    # Plan the motion to the home position
+    move_group.set_start_state_to_current_state()
+    move_group.set_named_target("home")
+    move_group.go(wait=True)
+    move_group.stop()
+    move_group.clear_pose_targets()
+
+    # wait for user input to continue
+    input("Press Enter to continue...")
+
     # Move the cylinder to a new location
     rospy.loginfo("Moving the cylinder to a new location")
-    pose_target.pose.position.x = -0.4
-    pose_target.pose.position.y = -0.4
-    pose_target.pose.position.z = 0.5
+    pose_target.pose.position.x = 0.6
+    pose_target.pose.position.y = 0.2
+    pose_target.pose.position.z = 0.35
     move_group.set_start_state_to_current_state()
     move_group.set_pose_target(pose_target)
     move_group.go(wait=True)
@@ -260,7 +270,7 @@ def motion_planner(cylinder_pose):
     # Return the robot to the home position
     rospy.loginfo("Returning to home position")
     move_group.set_start_state_to_current_state()
-    move_group.set_named_target("home")
+    move_group.set_named_target("up")
     move_group.go(wait=True)
     move_group.stop()
     move_group.clear_pose_targets()
